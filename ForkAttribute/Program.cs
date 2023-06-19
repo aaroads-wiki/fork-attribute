@@ -27,28 +27,39 @@ class Program
             writer.WriteLine("Title: " + title);
             List<string> names = new List<string>();
 
+            string lastRevision = "";
+
             foreach (var revision in page.Items)
             {
                 if (revision is RevisionType)
                 {
                     RevisionType revisionType = (RevisionType)revision;
+
                     if (revisionType.contributor != null)
                     {
-                        string user = revisionType.contributor.username;
+                        string user = revisionType.contributor.username ?? revisionType.contributor.ip;
                         if (user != null && !names.Contains(user))
                         {
                             names.Add(user);
                         }
+                        lastRevision = revisionType.timestamp.ToString("yyyyMMdd");
                     }
                 }
             }
 
             string resultString = "";
+            bool first = true;
             foreach (var name in names)
             {
-                resultString += name + ",";
+                if (!first)
+                {
+                    resultString += ", ";
+
+                }
+                resultString += name;
+                first = false;
             }
-            writer.WriteLine(resultString);
+            writer.WriteLine("{{attribution|date=" + lastRevision + "|editors=" + resultString + "}}");
 
         }
 
