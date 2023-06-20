@@ -140,6 +140,7 @@ partial class Program
                 case "828":
                     wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
                     break;
+                case "100": continue; //don't care
                 default: throw new Exception ("undefined namespace " + page.ns);
             }
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
