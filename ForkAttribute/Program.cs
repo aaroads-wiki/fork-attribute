@@ -134,6 +134,9 @@ partial class Program
                 case "10":
                     wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:",""));
                     break;
+                case "828":
+                    wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
+                    break;
                 default: throw new Exception ("undefined namespace " + page.ns);
             }
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
