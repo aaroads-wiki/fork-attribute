@@ -134,12 +134,16 @@ partial class Program
                 case "10":
                     wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:",""));
                     break;
+                case "14":
+                    wikiPage = new WikiPage(site, "Category talk:" + title.Replace("Category:", ""));
+                    break;
                 case "828":
                     wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
                     break;
                 default: throw new Exception ("undefined namespace " + page.ns);
             }
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
+            if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution")) continue; //no duplicates
             wikiPage.Content += ("{{attribution|date=" + lastRevision + "|editors=" + resultString + "}}");
 
             await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
