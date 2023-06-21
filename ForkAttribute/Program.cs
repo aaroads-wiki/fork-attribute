@@ -106,7 +106,7 @@ partial class Program
                         {
                             names.Add(user);
                         }
-                        lastRevision = revisionType.timestamp.ToString("yyyyMMdd");
+                        lastRevision = revisionType.timestamp.ToString("yyyy-MM-dd");
                     }
                 }
             }
