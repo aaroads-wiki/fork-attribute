@@ -221,5 +221,6 @@ partial class Program
         // We're done here
         await site.LogoutAsync();
         client.Dispose();        // Or you may use `using` statement.
+        Console.Beep();
     }
 }
