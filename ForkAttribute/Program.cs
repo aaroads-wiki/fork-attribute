@@ -59,7 +59,7 @@ partial class Program
             ClientUserAgent = "AttributionBot"
         };
 
-        client.Timeout = new TimeSpan(0, 0, 60); //30 seconds
+        client.Timeout = new TimeSpan(0, 0, 300); //seconds
 
         // You can create multiple WikiSite instances on the same WikiClient to share the state.
         var site = new WikiSite(client, url);
@@ -148,9 +148,10 @@ partial class Program
 
                                 importDest.Content = revText; //blank out the content
 
+                                Console.WriteLine("Started import at " + DateTime.Now);
                                 await importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
 
-                                Console.WriteLine("Saved to wiki, now sleeping");
+                                Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
                                 Thread.Sleep(10 * 1000);
                             }
                         }
