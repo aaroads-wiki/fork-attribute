@@ -6,6 +6,8 @@ using WikiClientLibrary.Sites;
 using WikiClientLibrary;
 using WikiClientLibrary.Pages;
 using System.ComponentModel.Design;
+using System.Threading;
+using System.Diagnostics;
 
 //https://github.com/CXuesong/WikiClientLibrary/wiki/%5BMediaWiki%5D-Getting-started
 namespace ForkAttribute;
@@ -46,6 +48,10 @@ namespace ForkAttribute;
 */
 partial class Program
 {
+
+    static WikiClient client;
+    static WikiSite site;
+
     const string url = "https://www.aaroads.com/w/api.php";
 
     static async Task Main(string[] args)
@@ -53,32 +59,7 @@ partial class Program
         
         Console.WriteLine("Parsing " + args[0]);
 
-        // A WikiClient has its own CookieContainer.
-        var client = new WikiClient
-        {
-            ClientUserAgent = "AttributionBot"
-        };
-
-        client.Timeout = new TimeSpan(0, 0, 300); //seconds
-
-        // You can create multiple WikiSite instances on the same WikiClient to share the state.
-        var site = new WikiSite(client, url);
-        // Wait for initialization to complete.
-        // Throws error if any.
-        await site.Initialization;
-        try
-        {
-            //need a static field defined here or in another file
-            await site.LoginAsync("AttributionBot", password);
-        }
-        catch (WikiClientException ex)
-        {
-            Console.WriteLine(ex.Message);
-            // Add your exception handler for failed login attempt.
-        }
-
-        // Do what you want
-        Console.WriteLine("you are now logged in!");
+        await login();
 
         // Open XML file containing exported wiki pages
         var xml = new XmlDocument();
@@ -149,10 +130,32 @@ partial class Program
                                 importDest.Content = revText; //blank out the content
 
                                 Console.WriteLine("Started import at " + DateTime.Now);
-                                await importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
+                                int timeout = 1000 * 180;
+                                using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+                                {
+                                    var task = importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
+                                    if (await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token)) == task)
+                                    {
+                                        timeoutCancellationTokenSource.Cancel();
+                                        await task; //throw exceptions
 
-                                Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
-                                Thread.Sleep(10 * 1000);
+                                        Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
+                                        Thread.Sleep(10 * 1000);
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Timed out at " + DateTime.Now + "");
+                                        await importDest.RefreshAsync(PageQueryOptions.FetchContent);
+                                        if (importDest.Content == revText)
+                                        {
+                                            Console.WriteLine("Import is equal to existing content, probably was okay");
+                                            await logout(); //reset client
+                                            await login();
+                                        }
+                                        else
+                                            throw new Exception("Import failed!");
+                                    }
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -200,6 +203,7 @@ partial class Program
                 case "100": continue; //don't care
                 default: throw new Exception("undefined namespace " + page.ns);
             }
+            Console.WriteLine("Retrieving talk page");
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
             
             string content = ("{{attribution|date=" + lastRevision + "|editors=" + resultString);
@@ -213,14 +217,51 @@ partial class Program
             else content += "|main=yes"; //does nothing but just for ID
             wikiPage.Content += (content + "}}");
 
+            Console.WriteLine("Providing attribution");
             await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
         
         }
 
+        await logout();
+        
+        Console.Beep();
+    }
 
+    async static     Task login()
+    {
+        // A WikiClient has its own CookieContainer.
+        client = new WikiClient
+        {
+            ClientUserAgent = "AttributionBot"
+        };
+        client.Timeout = new TimeSpan(0, 0, 180); //seconds
+
+        // You can create multiple WikiSite instances on the same WikiClient to share the state.
+        site = new WikiSite(client, url);
+
+        // Wait for initialization to complete.
+        // Throws error if any.
+        await site.Initialization;
+        try
+        {
+            //need a static field defined here or in another file
+            await site.LoginAsync("AttributionBot", password);
+        }
+        catch (WikiClientException ex)
+        {
+            Console.WriteLine(ex.Message);
+            // Add your exception handler for failed login attempt.
+        }
+
+        // Do what you want
+        Console.WriteLine("you are now logged in!");
+    }
+
+    async static    Task logout()
+    {
         // We're done here
         await site.LogoutAsync();
         client.Dispose();        // Or you may use `using` statement.
-        Console.Beep();
+        Console.WriteLine("Logged out");
     }
 }
