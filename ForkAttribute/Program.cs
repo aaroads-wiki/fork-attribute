@@ -58,6 +58,9 @@ partial class Program
         {
             ClientUserAgent = "AttributionBot"
         };
+
+        client.Timeout = new TimeSpan(0, 0, 60); //30 seconds
+
         // You can create multiple WikiSite instances on the same WikiClient to share the state.
         var site = new WikiSite(client, url);
         // Wait for initialization to complete.
@@ -98,8 +101,9 @@ partial class Program
             bool pastHistory = false;
             string redirectTarget = "";
 
-            foreach (var revision in page.Items)
+            for (int i = 0; i < page.Items.Count(); i++)
             {
+                var revision = page.Items[i];
                 if (revision is RevisionType)
                 {
                     RevisionType revisionType = (RevisionType)revision;
@@ -127,6 +131,35 @@ partial class Program
                     {
                         isRedirect = false;
                         pastHistory = true;
+                    }
+
+                    if (i == page.Items.Count() - 1)
+                    {  //current rev: import
+
+                        try
+                        {
+                            WikiPage importDest = new WikiPage(site, title);
+
+                            await importDest.RefreshAsync(PageQueryOptions.FetchContent);
+
+                            if (importDest.Content == revText)
+                                Console.WriteLine("Import is equal to existing content, skipping");
+                            else { 
+
+                                importDest.Content = revText; //blank out the content
+
+                                await importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
+
+                                Console.WriteLine("Saved to wiki, now sleeping");
+                                Thread.Sleep(10 * 1000);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            
+                            Console.WriteLine(ex.ToString());
+                            Thread.Sleep(10 * 1000);
+                        }
                     }
                 }
             }
@@ -176,7 +209,7 @@ partial class Program
             else if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution") && /*!wikiPage.Content.Contains("redirect=yes") &&*/
                 wikiPage.Content.Contains("main=yes")) continue; //no duplicates
             else if (isRedirect && !pastHistory) continue; //no useless templates
-            else content = "|main=yes"; //does nothing but just for ID
+            else content += "|main=yes"; //does nothing but just for ID
             wikiPage.Content += (content + "}}");
 
             await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
