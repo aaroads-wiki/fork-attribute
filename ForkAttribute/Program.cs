@@ -5,6 +5,7 @@ using WikiClientLibrary.Client;
 using WikiClientLibrary.Sites;
 using WikiClientLibrary;
 using WikiClientLibrary.Pages;
+using System.ComponentModel.Design;
 
 //https://github.com/CXuesong/WikiClientLibrary/wiki/%5BMediaWiki%5D-Getting-started
 namespace ForkAttribute;
@@ -93,13 +94,19 @@ partial class Program
 
             string lastRevision = "";
 
+            bool isRedirect = false;
+            bool pastHistory = false;
+            string redirectTarget = "";
+
             foreach (var revision in page.Items)
             {
                 if (revision is RevisionType)
                 {
                     RevisionType revisionType = (RevisionType)revision;
+                    if (revisionType == null)
+                        continue;
 
-                    if (revisionType.contributor != null)
+                    if (revisionType != null && revisionType.contributor != null)
                     {
                         string user = revisionType.contributor.username ?? revisionType.contributor.ip;
                         if (user != null && !names.Contains(user))
@@ -107,6 +114,19 @@ partial class Program
                             names.Add(user);
                         }
                         lastRevision = revisionType.timestamp.ToString("yyyy-MM-dd");
+                    }
+                    var revText = revisionType.text.Value;
+                    if (revisionType.text.Value != null && revText.ToLower().Contains("#redirect")
+                        && revText.Contains("[[") && revText.Contains("]]"))
+                    {
+                        isRedirect = true;
+                        
+                        redirectTarget = revText.Substring(revText.IndexOf("[[") + 2, revText.IndexOf("]]") - revText.IndexOf("[[") -2);
+                    }
+                    else
+                    {
+                        isRedirect = false;
+                        pastHistory = true;
                     }
                 }
             }
@@ -125,14 +145,17 @@ partial class Program
             }
             //won't work for non-mainspace!
 
+            if (isRedirect && pastHistory)
+                title = redirectTarget; //go to the redirect target instead
 
             WikiPage wikiPage;
             switch (page.ns)
             {
-                case "0": wikiPage = new WikiPage(site, "Talk:" + title);
+                case "0":
+                    wikiPage = new WikiPage(site, "Talk:" + title);
                     break;
                 case "10":
-                    wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:",""));
+                    wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:", ""));
                     break;
                 case "14":
                     wikiPage = new WikiPage(site, "Category talk:" + title.Replace("Category:", ""));
@@ -141,14 +164,23 @@ partial class Program
                     wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
                     break;
                 case "100": continue; //don't care
-                default: throw new Exception ("undefined namespace " + page.ns);
+                default: throw new Exception("undefined namespace " + page.ns);
             }
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
-            if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution")) continue; //no duplicates
-            wikiPage.Content += ("{{attribution|date=" + lastRevision + "|editors=" + resultString + "}}");
+            
+            string content = ("{{attribution|date=" + lastRevision + "|editors=" + resultString);
+            if (isRedirect && pastHistory)
+            {
+                content += "|redirect=" + page.title;
+            }
+            else if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution") && /*!wikiPage.Content.Contains("redirect=yes") &&*/
+                wikiPage.Content.Contains("main=yes")) continue; //no duplicates
+            else if (isRedirect && !pastHistory) continue; //no useless templates
+            else content = "|main=yes"; //does nothing but just for ID
+            wikiPage.Content += (content + "}}");
 
             await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
-
+        
         }
 
 
