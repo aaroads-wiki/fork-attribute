@@ -148,7 +148,8 @@ partial class Program
                                         await task; //throw exceptions
 
                                         Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
-                                        Thread.Sleep(10 * 1000);
+                                        if (isRedirect) Thread.Sleep(5 * 1000);
+                                        else Thread.Sleep(10 * 1000);
                                     }
                                     else
                                     {
