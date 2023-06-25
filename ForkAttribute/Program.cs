@@ -77,6 +77,7 @@ partial class Program
             string title = page.title;
             Console.WriteLine(title);
             List<string> names = new List<string>();
+            List<string> ipNames = new List<string>();
 
             string lastRevision = "";
 
@@ -101,10 +102,20 @@ partial class Program
 
                     if (revisionType != null && revisionType.contributor != null)
                     {
-                        string user = revisionType.contributor.username ?? revisionType.contributor.ip;
-                        if (user != null && !names.Contains(user))
+                        if (revisionType.contributor.ip != null && revisionType.contributor.ip.Length > 0)
                         {
-                            names.Add(user);
+                            if (!ipNames.Contains(revisionType.contributor.ip))
+                            {
+                                ipNames.Add(revisionType.contributor.ip);
+                            }
+                        }
+                        else
+                        {
+                            string user = revisionType.contributor.username;
+                            if (user != null && !names.Contains(user))
+                            {
+                                names.Add(user);
+                            }
                         }
                         lastRevision = revisionType.timestamp.ToString("yyyy-MM-dd");
                     }
@@ -120,7 +131,11 @@ partial class Program
                     }
 
                     if (i == page.Items.Count() - 1)
-                    {  //current rev: import
+                    {
+                        if (ipNames.Count > 0)
+                            names.Add("Anonymous editors: " + ipNames.Count);
+                        
+                        //current rev: import
 
                         try
                         {
