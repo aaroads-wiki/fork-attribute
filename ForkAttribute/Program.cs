@@ -71,6 +71,7 @@ partial class Program
         var nodeReader = new XmlNodeReader(xml);
         var mw = (MediaWikiType)serializer.Deserialize(nodeReader);
         int errors = 0;
+        int warnings = 0;
         foreach (var page in mw.page)
         {
             string title = page.title;
@@ -86,6 +87,11 @@ partial class Program
             
             for (int i = 0; i < page.Items.Count(); i++)
             {
+                if (i == 1000)
+                {
+                    warnings++;
+                    Console.WriteLine("WARNING: was exactly 1000 revs");
+                }
                 var revision = page.Items[i];
                 if (revision is RevisionType)
                 {
@@ -228,6 +234,7 @@ partial class Program
         await logout();
         Console.WriteLine("");
         Console.WriteLine("There were " + errors + " errors.");
+        Console.WriteLine("There were " + warnings + " warnings.");
         Console.Beep();
     }
 
