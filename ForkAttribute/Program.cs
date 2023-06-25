@@ -87,7 +87,7 @@ partial class Program
             
             for (int i = 0; i < page.Items.Count(); i++)
             {
-                if (i == 1000)
+                if (page.Items.Count() == 1000)
                 {
                     warnings++;
                     Console.WriteLine("WARNING: was exactly 1000 revs");
