@@ -109,16 +109,13 @@ partial class Program
                         lastRevision = revisionType.timestamp.ToString("yyyy-MM-dd");
                     }
                     var revText = revisionType.text.Value;
-                    if (revisionType.text.Value != null && revText.ToLower().Contains("#redirect")
-                        && revText.Contains("[[") && revText.Contains("]]"))
+                    if (page.redirect != null && page.redirect.title != null && page.redirect.title.Length > 0)
                     {
                         isRedirect = true;
-                        
-                        redirectTarget = revText.Substring(revText.IndexOf("[[") + 2, revText.IndexOf("]]") - revText.IndexOf("[[") -2);
+                        redirectTarget = page.redirect.title;
                     }
-                    else
+                    if (revText != null && !revText.ToLower().Contains("#redirect")) //if there's any rev that doesn't have the redirect
                     {
-                        isRedirect = false;
                         pastHistory = true;
                     }
 
