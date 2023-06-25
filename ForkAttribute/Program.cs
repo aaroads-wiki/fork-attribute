@@ -8,6 +8,7 @@ using WikiClientLibrary.Pages;
 using System.ComponentModel.Design;
 using System.Threading;
 using System.Diagnostics;
+using System.ComponentModel;
 
 //https://github.com/CXuesong/WikiClientLibrary/wiki/%5BMediaWiki%5D-Getting-started
 namespace ForkAttribute;
@@ -69,7 +70,7 @@ partial class Program
         var serializer = new XmlSerializer(typeof(MediaWikiType));
         var nodeReader = new XmlNodeReader(xml);
         var mw = (MediaWikiType)serializer.Deserialize(nodeReader);
-
+        int errors = 0;
         foreach (var page in mw.page)
         {
             string title = page.title;
@@ -82,6 +83,7 @@ partial class Program
             bool pastHistory = false;
             string redirectTarget = "";
 
+            
             for (int i = 0; i < page.Items.Count(); i++)
             {
                 var revision = page.Items[i];
@@ -163,6 +165,7 @@ partial class Program
                             
                             Console.WriteLine(ex.ToString());
                             Thread.Sleep(10 * 1000);
+                            errors++;
                         }
                     }
                 }
@@ -223,7 +226,8 @@ partial class Program
         }
 
         await logout();
-        
+        Console.WriteLine("");
+        Console.WriteLine("There were " + errors + " errors.");
         Console.Beep();
     }
 
