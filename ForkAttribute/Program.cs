@@ -74,6 +74,11 @@ partial class Program
         int warnings = 0;
         foreach (var page in mw.page)
         {
+            if (page.ns == "100" || page.ns == "118")
+            {
+                Console.WriteLine("Skipping " + page.title);
+                continue;
+            }
             string title = page.title;
             Console.WriteLine(title);
             List<string> names = new List<string>();
@@ -222,7 +227,7 @@ partial class Program
                 case "828":
                     wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
                     break;
-                case "100": continue; //don't care
+                case "100": case "118": continue; //don't care
                 default: throw new Exception("undefined namespace " + page.ns);
             }
             Console.WriteLine("Retrieving talk page");
