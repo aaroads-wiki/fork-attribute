@@ -72,11 +72,13 @@ partial class Program
         var mw = (MediaWikiType)serializer.Deserialize(nodeReader);
         int errors = 0;
         int warnings = 0;
+        int pagesDone = 0;
         foreach (var page in mw.page)
         {
             if (page.ns == "100" || page.ns == "118")
             {
                 Console.WriteLine("Skipping " + page.title);
+                pagesDone++;
                 continue;
             }
             string title = page.title;
@@ -192,6 +194,8 @@ partial class Program
                             errors++;
                         }
                     }
+
+                    
                 }
             }
 
@@ -239,14 +243,24 @@ partial class Program
                 content += "|redirect=" + page.title;
             }
             else if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution") && /*!wikiPage.Content.Contains("redirect=yes") &&*/
-                wikiPage.Content.Contains("main=yes")) continue; //no duplicates
-            else if (isRedirect && !pastHistory) continue; //no useless templates
+                wikiPage.Content.Contains("main=yes"))
+            {
+                pagesDone++;
+                continue; //no duplicates
+            }
+            else if (isRedirect && !pastHistory)
+            {
+                pagesDone++;
+                continue; //no useless templates
+            }
             else content += "|main=yes"; //does nothing but just for ID
             wikiPage.Content += (content + "}}");
 
             Console.WriteLine("Providing attribution");
             await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
-        
+
+            pagesDone++;
+            Console.WriteLine((mw.page.Count() - pagesDone) + " items left.");
         }
 
         await logout();
