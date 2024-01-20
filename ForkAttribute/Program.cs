@@ -52,8 +52,9 @@ partial class Program
 
     static WikiClient client;
     static WikiSite site;
+    static bool IMPORT = true;
 
-    const string url = "https://www.aaroads.com/w/api.php";
+    const string url = "https://wiki.aaroads.com/w/api.php";
 
     static async Task Main(string[] args)
     {
@@ -81,7 +82,7 @@ partial class Program
                 pagesDone++;
                 continue;
             }
-            string title = page.title;
+            string title = page.title.Replace("Wikipedia:", "AARoads:");
             Console.WriteLine(title);
             List<string> names = new List<string>();
             List<string> ipNames = new List<string>();
@@ -139,59 +140,35 @@ partial class Program
 
                     if (i == page.Items.Count() - 1)
                     {
+
                         if (ipNames.Count > 0)
                             names.Add("Anonymous editors: " + ipNames.Count);
-                        
+
                         //current rev: import
 
-                        try
+                        if (IMPORT)
                         {
-                            WikiPage importDest = new WikiPage(site, title);
+                            try
+                            {
+                                await importPage(title, revText, isRedirect, revisionType);
 
-                            await importDest.RefreshAsync(PageQueryOptions.FetchContent);
+                            }
+                            catch (Exception ex)
+                            {
 
-                            if (importDest.Content == revText)
-                                Console.WriteLine("Import is equal to existing content, skipping");
-                            else { 
-
-                                importDest.Content = revText; //blank out the content
-
-                                Console.WriteLine("Started import at " + DateTime.Now);
-                                int timeout = 1000 * 180;
-                                using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+                                Console.WriteLine(ex.ToString());
+                                Thread.Sleep(10 * 1000);
+                                Console.WriteLine("retrying");
+                                try
                                 {
-                                    var task = importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
-                                    if (await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token)) == task)
-                                    {
-                                        timeoutCancellationTokenSource.Cancel();
-                                        await task; //throw exceptions
-
-                                        Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
-                                        if (isRedirect) Thread.Sleep(4 * 1000);
-                                        else Thread.Sleep(10 * 1000);
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Timed out at " + DateTime.Now + "");
-                                        await importDest.RefreshAsync(PageQueryOptions.FetchContent);
-                                        if (importDest.Content == revText)
-                                        {
-                                            Console.WriteLine("Import is equal to existing content, probably was okay");
-                                            await logout(); //reset client
-                                            await login();
-                                        }
-                                        else
-                                            throw new Exception("Import failed!");
-                                    }
+                                    await importPage(title, revText, isRedirect, revisionType);
+                                }
+                                catch (Exception ex2) {
+                                    Console.WriteLine(ex2.ToString());
+                                    Thread.Sleep(10 * 1000);
+                                    errors++;
                                 }
                             }
-                        }
-                        catch (Exception ex)
-                        {
-                            
-                            Console.WriteLine(ex.ToString());
-                            Thread.Sleep(10 * 1000);
-                            errors++;
                         }
                     }
 
@@ -213,6 +190,7 @@ partial class Program
             }
             //won't work for non-mainspace!
 
+            if (isRedirect && page.ns == "4") continue; //skip project space redirects
             if (isRedirect && pastHistory)
                 title = redirectTarget; //go to the redirect target instead
 
@@ -221,6 +199,12 @@ partial class Program
             {
                 case "0":
                     wikiPage = new WikiPage(site, "Talk:" + title);
+                    break;
+                case "12":
+                    wikiPage = new WikiPage(site, "Help talk:" + title);
+                    break;
+                case "4":
+                    wikiPage = new WikiPage(site, title.Replace("AARoads:","AARoads talk:"));
                     break;
                 case "10":
                     wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:", ""));
@@ -256,8 +240,21 @@ partial class Program
             else content += "|main=yes"; //does nothing but just for ID
             wikiPage.Content += (content + "}}");
 
-            Console.WriteLine("Providing attribution");
-            await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
+            
+            bool success = false;
+            while (!success)
+            {
+                try
+                {
+                    Console.WriteLine("Providing attribution");
+                    await wikiPage.UpdateContentAsync("Provide attribution", minor: false, bot: true);
+                    success = true;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed, retrying");
+                }
+            }
 
             pagesDone++;
             Console.WriteLine((mw.page.Count() - pagesDone) + " items left.");
@@ -268,6 +265,50 @@ partial class Program
         Console.WriteLine("There were " + errors + " errors.");
         Console.WriteLine("There were " + warnings + " warnings.");
         Console.Beep();
+    }
+
+    async static Task importPage(string title, string revText, bool isRedirect, RevisionType revisionType)
+    {
+        WikiPage importDest = new WikiPage(site, title);
+
+        await importDest.RefreshAsync(PageQueryOptions.FetchContent);
+
+        if (importDest.Content == revText)
+            Console.WriteLine("Import is equal to existing content, skipping");
+        else
+        {
+
+            importDest.Content = revText; //blank out the content
+
+            Console.WriteLine("Started import at " + DateTime.Now);
+            int timeout = 1000 * 180;
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            {
+                var task = importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
+                if (await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token)) == task)
+                {
+                    timeoutCancellationTokenSource.Cancel();
+                    await task; //throw exceptions
+
+                    Console.WriteLine("Saved to wiki at " + DateTime.Now + ", now sleeping");
+                    if (isRedirect) Thread.Sleep(4 * 1000);
+                    else Thread.Sleep(10 * 1000);
+                }
+                else
+                {
+                    Console.WriteLine("Timed out at " + DateTime.Now + "");
+                    await importDest.RefreshAsync(PageQueryOptions.FetchContent);
+                    if (importDest.Content == revText)
+                    {
+                        Console.WriteLine("Import is equal to existing content, probably was okay");
+                        await logout(); //reset client
+                        await login();
+                    }
+                    else
+                        throw new Exception("Import failed!");
+                }
+            }
+        }
     }
 
     async static     Task login()
