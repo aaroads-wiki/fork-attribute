@@ -93,14 +93,15 @@ partial class Program
             bool pastHistory = false;
             string redirectTarget = "";
 
-            
+            if (page.Items.Count() == 1000 && mw.page.Length > 1)
+            {
+                warnings++;
+                Console.WriteLine("was exactly 1000 revs, skipping, must redo!");
+                continue;
+            }
             for (int i = 0; i < page.Items.Count(); i++)
             {
-                if (page.Items.Count() == 1000)
-                {
-                    warnings++;
-                    Console.WriteLine("WARNING: was exactly 1000 revs");
-                }
+                
                 var revision = page.Items[i];
                 if (revision is RevisionType)
                 {
