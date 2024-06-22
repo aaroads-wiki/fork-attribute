@@ -20,8 +20,8 @@ using System.Xml.Serialization;
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
-[System.Xml.Serialization.XmlRootAttribute("mediawiki", Namespace = "http://www.mediawiki.org/xml/export-0.10/", IsNullable = false)]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
+[System.Xml.Serialization.XmlRootAttribute("mediawiki", Namespace = "http://www.mediawiki.org/xml/export-0.11/", IsNullable = false)]
 public partial class MediaWikiType
 {
 
@@ -110,7 +110,7 @@ public partial class MediaWikiType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class SiteInfoType
 {
 
@@ -226,7 +226,7 @@ public partial class SiteInfoType
 /// <remarks/>
 [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
 [System.SerializableAttribute()]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public enum CaseType
 {
 
@@ -248,7 +248,7 @@ public enum CaseType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class NamespaceType
 {
 
@@ -322,7 +322,7 @@ public partial class NamespaceType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class TextType
 {
 
@@ -426,7 +426,7 @@ public partial class TextType
 /// <remarks/>
 [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.8.3928.0")]
 [System.SerializableAttribute()]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public enum DeletedFlagType
 {
 
@@ -439,7 +439,7 @@ public enum DeletedFlagType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class DiscussionThreadingInfo
 {
 
@@ -572,7 +572,7 @@ public partial class DiscussionThreadingInfo
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class UploadType
 {
 
@@ -674,7 +674,7 @@ public partial class UploadType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class ContributorType
 {
 
@@ -762,7 +762,7 @@ public partial class ContributorType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class LogParamsType
 {
 
@@ -804,7 +804,7 @@ public partial class LogParamsType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class LogTextType
 {
 
@@ -862,7 +862,7 @@ public partial class LogTextType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class CommentType
 {
 
@@ -920,7 +920,7 @@ public partial class CommentType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class LogItemType
 {
 
@@ -1066,7 +1066,7 @@ public partial class LogItemType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class RevisionType
 {
 
@@ -1228,7 +1228,7 @@ public partial class RevisionType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class RedirectType
 {
 
@@ -1270,7 +1270,7 @@ public partial class RedirectType
 [System.SerializableAttribute()]
 [System.Diagnostics.DebuggerStepThroughAttribute()]
 [System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.10/")]
+[System.Xml.Serialization.XmlTypeAttribute(Namespace = "http://www.mediawiki.org/xml/export-0.11/")]
 public partial class PageType
 {
 

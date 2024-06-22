@@ -221,24 +221,31 @@ partial class Program
             }
             Console.WriteLine("Retrieving talk page");
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
-            
-            string content = ("{{attribution|date=" + lastRevision + "|editors=" + resultString);
+
+            string content = "";
             if (isRedirect && pastHistory)
             {
-                content += "|redirect=" + page.title;
+                content += "{{attribution|date=" + lastRevision + "|editors=" + resultString + "|redirect=" + page.title;
             }
             else if (wikiPage.Content != null && wikiPage.Content.Contains("{{attribution") && /*!wikiPage.Content.Contains("redirect=yes") &&*/
                 wikiPage.Content.Contains("main=yes"))
             {
+                content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
                 pagesDone++;
                 continue; //no duplicates
             }
             else if (isRedirect && !pastHistory)
             {
+                content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
                 pagesDone++;
                 continue; //no useless templates
             }
-            else content += "|main=yes"; //does nothing but just for ID
+            else
+            {
+                content += "{{Talk header\n|{{Banner/South Africa}}\n}}\n";
+                content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
+                content += "|main=yes"; //does nothing but just for ID
+            }
             wikiPage.Content += (content + "}}");
 
             
