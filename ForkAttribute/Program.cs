@@ -158,7 +158,7 @@ partial class Program
                             {
 
                                 Console.WriteLine(ex.ToString());
-                                Thread.Sleep(10 * 1000);
+                                Thread.Sleep(15 * 1000);
                                 Console.WriteLine("retrying");
                                 try
                                 {
@@ -242,7 +242,8 @@ partial class Program
             }
             else
             {
-                content += "{{Talk header\n|{{Banner/South Africa}}\n}}\n";
+                //content += "{{Talk header\n}}\n";
+                content += "{{Talk header\n|{{Banner/France}}\n}}\n";
                 content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
                 content += "|main=yes"; //does nothing but just for ID
             }
@@ -283,7 +284,9 @@ partial class Program
 
         if (importDest.Content == revText)
             Console.WriteLine("Import is equal to existing content, skipping");
-        else
+        else if (importDest.Content != null && importDest.Content.Length > 2)
+            Console.WriteLine("Import has content already, skipping, will still attribute, please review");
+            else
         {
 
             importDest.Content = revText; //blank out the content
