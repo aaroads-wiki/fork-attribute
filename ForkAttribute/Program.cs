@@ -242,8 +242,15 @@ partial class Program
             }
             else
             {
-                //content += "{{Talk header\n}}\n";
-                content += "{{Talk header\n|{{Banner/France}}\n}}\n";
+                if (args.Length > 1)
+                {
+                    content += "{{Talk header|\n{{Banner/" + args[1] + "}}\n}}\n";
+                }
+                else
+                {
+                    content += "{{Talk header\n}}\n";
+                }
+                
                 content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
                 content += "|main=yes"; //does nothing but just for ID
             }
