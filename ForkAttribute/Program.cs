@@ -254,7 +254,7 @@ partial class Program
                 content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
                 content += "|main=yes"; //does nothing but just for ID
             }
-            wikiPage.Content += (content + "}}");
+            wikiPage.Content += (content + "}}\n");
 
             
             bool success = false;
