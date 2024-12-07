@@ -53,6 +53,7 @@ partial class Program
     static WikiClient client;
     static WikiSite site;
     static bool IMPORT = true;
+    static bool DRAFT = false;
 
     const string url = "https://wiki.aaroads.com/w/api.php";
 
@@ -82,7 +83,8 @@ partial class Program
                 pagesDone++;
                 continue;
             }
-            string title = page.title.Replace("Wikipedia:", "AARoads:");
+            string draft = DRAFT ? "Draft:" : "";
+            string title = draft + page.title.Replace("Wikipedia:", "AARoads:");
             Console.WriteLine(title);
             List<string> names = new List<string>();
             List<string> ipNames = new List<string>();
@@ -196,28 +198,33 @@ partial class Program
                 title = redirectTarget; //go to the redirect target instead
 
             WikiPage wikiPage;
-            switch (page.ns)
+            if (DRAFT)
+                wikiPage = new WikiPage(site, title.Replace("Draft:", "Draft talk:"));
+            else
             {
-                case "0":
-                    wikiPage = new WikiPage(site, "Talk:" + title);
-                    break;
-                case "12":
-                    wikiPage = new WikiPage(site, "Help talk:" + title);
-                    break;
-                case "4":
-                    wikiPage = new WikiPage(site, title.Replace("AARoads:","AARoads talk:"));
-                    break;
-                case "10":
-                    wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:", ""));
-                    break;
-                case "14":
-                    wikiPage = new WikiPage(site, "Category talk:" + title.Replace("Category:", ""));
-                    break;
-                case "828":
-                    wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
-                    break;
-                case "100": case "118": continue; //don't care
-                default: throw new Exception("undefined namespace " + page.ns);
+                switch (page.ns)
+                {
+                    case "0":
+                        wikiPage = new WikiPage(site, "Talk:" + title);
+                        break;
+                    case "12":
+                        wikiPage = new WikiPage(site, "Help talk:" + title);
+                        break;
+                    case "4":
+                        wikiPage = new WikiPage(site, title.Replace("AARoads:", "AARoads talk:"));
+                        break;
+                    case "10":
+                        wikiPage = new WikiPage(site, "Template talk:" + title.Replace("Template:", ""));
+                        break;
+                    case "14":
+                        wikiPage = new WikiPage(site, "Category talk:" + title.Replace("Category:", ""));
+                        break;
+                    case "828":
+                        wikiPage = new WikiPage(site, "Module talk:" + title.Replace("Module:", ""));
+                        break;
+                    case "100": case "118": continue; //don't care
+                    default: throw new Exception("undefined namespace " + page.ns);
+                }
             }
             Console.WriteLine("Retrieving talk page");
             await wikiPage.RefreshAsync(PageQueryOptions.FetchContent);
