@@ -62,6 +62,11 @@ partial class Program
         
         Console.WriteLine("Parsing " + args[0]);
 
+        string lang = "en";
+        if (args.Length > 1)
+        {
+            lang = args[2];
+        }
         await login();
 
         // Open XML file containing exported wiki pages
@@ -153,7 +158,7 @@ partial class Program
                         {
                             try
                             {
-                                await importPage(title, revText, isRedirect, revisionType);
+                                await importPage(title, revText, isRedirect, revisionType, lang);
 
                             }
                             catch (Exception ex)
@@ -164,7 +169,7 @@ partial class Program
                                 Console.WriteLine("retrying");
                                 try
                                 {
-                                    await importPage(title, revText, isRedirect, revisionType);
+                                    await importPage(title, revText, isRedirect, revisionType, lang);
                                 }
                                 catch (Exception ex2) {
                                     Console.WriteLine(ex2.ToString());
@@ -259,6 +264,7 @@ partial class Program
                 }
                 
                 content += "{{attribution|date=" + lastRevision + "|editors=" + resultString;
+                content += "|lang=" + lang;
                 content += "|main=yes"; //does nothing but just for ID
             }
             wikiPage.Content += (content + "}}\n");
@@ -290,7 +296,7 @@ partial class Program
         Console.Beep();
     }
 
-    async static Task importPage(string title, string revText, bool isRedirect, RevisionType revisionType)
+    async static Task importPage(string title, string revText, bool isRedirect, RevisionType revisionType, string lang = "en")
     {
         WikiPage importDest = new WikiPage(site, title);
 
@@ -298,7 +304,7 @@ partial class Program
 
         if (importDest.Content == revText)
             Console.WriteLine("Import is equal to existing content, skipping");
-        else if (importDest.Content != null && importDest.Content.Length > 2)
+        else if (importDest.Content != null && importDest.Content.Length > 2 && !importDest.Content.ToLower().Contains("#redirect"))
             Console.WriteLine("Import has content already, skipping, will still attribute, please review");
             else
         {
@@ -309,7 +315,7 @@ partial class Program
             int timeout = 1000 * 180;
             using (var timeoutCancellationTokenSource = new CancellationTokenSource())
             {
-                var task = importDest.UpdateContentAsync("Import from [[:w:en:Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
+                var task = importDest.UpdateContentAsync("Import from [[:w:" + lang + ":Special:Diff/" + revisionType.id + "]]", minor: false, bot: false); //don't invoke the bot flag
                 if (await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token)) == task)
                 {
                     timeoutCancellationTokenSource.Cancel();
