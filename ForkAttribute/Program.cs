@@ -58,7 +58,7 @@ partial class Program
     static bool USEIP = true;
     static bool DRAFT = false;
 
-    string url = USEIP ? "https://74.208.172.73/w/api.php" : "https://wiki.aaroads.com/w/api.php";
+    static string url = USEIP ? "https://74.208.172.73/w/api.php" : "https://wiki.aaroads.com/w/api.php";
 
     static async Task Main(string[] args)
     {
