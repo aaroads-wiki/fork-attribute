@@ -1,14 +1,16 @@
 ﻿using System.Collections;
+using System.ComponentModel;
+using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Xml;
 using System.Xml.Serialization;
-using WikiClientLibrary.Client;
-using WikiClientLibrary.Sites;
 using WikiClientLibrary;
+using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;
-using System.ComponentModel.Design;
-using System.Threading;
-using System.Diagnostics;
-using System.ComponentModel;
+using WikiClientLibrary.Sites;
 
 //https://github.com/CXuesong/WikiClientLibrary/wiki/%5BMediaWiki%5D-Getting-started
 namespace ForkAttribute;
@@ -53,9 +55,10 @@ partial class Program
     static WikiClient client;
     static WikiSite site;
     static bool IMPORT = true;
+    static bool USEIP = true;
     static bool DRAFT = false;
 
-    const string url = "https://wiki.aaroads.com/w/api.php";
+    string url = USEIP ? "https://74.208.172.73/w/api.php" : "https://wiki.aaroads.com/w/api.php";
 
     static async Task Main(string[] args)
     {
@@ -63,7 +66,7 @@ partial class Program
         Console.WriteLine("Parsing " + args[0]);
 
         string lang = "en";
-        if (args.Length > 1)
+        if (args.Length > 2)
         {
             lang = args[2];
         }
@@ -345,11 +348,24 @@ partial class Program
     async static     Task login()
     {
         // A WikiClient has its own CookieContainer.
-        client = new WikiClient
+        var handler = new HttpClientHandler();
+
+        handler.UseCookies = true;
+
+        if (handler.SupportsAutomaticDecompression)
         {
-            ClientUserAgent = "AttributionBot"
-        };
+            handler.AutomaticDecompression = DecompressionMethods.All;
+        }
+
+        if (USEIP)
+            handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+
+        client = new WikiClient(handler);
+
+         client.ClientUserAgent = "AttributionBot";
+
         client.Timeout = new TimeSpan(0, 0, 180); //seconds
+
 
         // You can create multiple WikiSite instances on the same WikiClient to share the state.
         site = new WikiSite(client, url);
